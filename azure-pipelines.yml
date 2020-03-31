@@ -4,18 +4,11 @@ trigger:
 variables:
     buildConfiguration: 'Release'
     dotnetSdkVersion: '3.1.100'
-
-schedules:
-      - cron: '0 3 * * *'
-        displayName: Deploy every day at 3 A.M.
-        branches:
-          include:
-          - release
-        always: false   
+  
 stages:
-  # ....................
+  # ...................
   # Build
-  # ....................
+  # ...................
   - stage: 'Build'
     displayName: 'Build the web application'
     jobs: 
@@ -76,9 +69,9 @@ stages:
       - publish: '$(Build.ArtifactStagingDirectory)'
         artifact: drop
 
-  # ....................
-  # Deploy to Dev
-  # ....................  
+  # ...................
+  # DEV
+  # ...................  
   - stage: 'Dev'
     displayName: 'Deploy to the dev environment'
     dependsOn: Build
@@ -101,13 +94,13 @@ stages:
                 azureSubscription: 'Resource Manager - Tailspin - Space Game'
                 appName: '$(WebAppNameDev)'
                 package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-  # ....................
-  # Deploy to Test
-  # ....................    
+ 
+  # ...................
+  # Test
+  # ................... 
   - stage: 'Test'
     displayName: 'Deploy to the test environment'
-    dependsOn: Dev  
-    #condition: eq(variables['Build.Reason'], 'Schedule')
+    dependsOn: Dev
     jobs:
     - deployment: Deploy
       pool:
@@ -152,9 +145,10 @@ stages:
           arguments: '--no-build --configuration $(buildConfiguration)'
           publishTestResults: true
           projects: '$(System.DefaultWorkingDirectory)/**/*UITests.csproj'
-  # ....................
-  # Deploy to Staging
-  # ....................    
+  
+  # ...................
+  # Stage
+  # ...................
   - stage: 'Staging'
     displayName: 'Deploy to the staging environment'
     dependsOn: Test
